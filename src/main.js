@@ -1,64 +1,46 @@
 import {Actor,log} from 'apify';
 import robotsParser from 'robots-parser';
-import {planJobs,safeUrl} from './planner.js';
-import {listProfiles,parseProfile,parsePublicWebsiteEmails} from './parser.js';
-const UA='DirectoryContactResearch/1.0 (respect robots; non-browser crawler)';
-const wait=ms=>new Promise(ok=>setTimeout(ok,ms));
-const defaults={dryRun:true,locations:[{city:'Houston',state:'Texas'},{city:'Dallas',state:'Texas'},{city:'Austin',state:'Texas'}],trades:['electrical'],maxListings:100,maxListingsPerJob:50,maxCategoryPagesPerJob:5,maxRequests:160,minDelayMs:2500,maxRuntimeSeconds:540,extractEmails:true,visitBusinessWebsites:false,maxBusinessPages:1,maxEstimatedUsd:0.50,estimatedUsdPerRequest:0.003};
+import {plan,pageUrl,profileUrls,parseProfile} from './core.js';
+const defaultInput={dryRun:true,locations:['Houston, TX','Dallas, TX','Austin, TX'],trades:['electrical'],maxListings:100,maxListingsPerJob:25,maxPagesPerJob:3,maxRequests:30,maxRuntimeSeconds:180,minDelayMs:3000,extractEmails:true,maxEstimatedUsd:0.25,estimatedUsdPerRequest:0.005};
 await Actor.init();
-const stats={requests:0,categoryPages:0,profilesVisited:0,records:0,blocked:false,stopReason:'',jobsCompleted:0};
-try{
- const i={...defaults,...(await Actor.getInput()||{})};
- for(const field of ['maxListings','maxListingsPerJob','maxCategoryPagesPerJob','maxRequests','maxRuntimeSeconds','maxBusinessPages']) if(!Number.isInteger(i[field])||i[field]<1) throw Error(`Invalid ${field}`);
- if(i.maxListings>10000||i.maxRequests>5000||i.maxCategoryPagesPerJob>30||i.maxRuntimeSeconds>3600||i.minDelayMs<1000||i.maxEstimatedUsd<=0||i.estimatedUsdPerRequest<=0) throw Error('Safety limits exceeded');
- const jobs=planJobs(i);
- if(i.dryRun) {const summary={mode:'DRY_RUN',jobs,config:i,warning:'No network requests to directories; running on Apify may still incur compute cost.'}; await Actor.setValue('SUMMARY',summary);log.info('DRY_RUN: no scraping executed', {jobs:jobs.length});}
- else {
-  const deadline=Date.now()+i.maxRuntimeSeconds*1000;
-  const robots=new Map();let last=0;const seenProfiles=new Set(),seenCompanies=new Set();
-  function check(){if(Date.now()>=deadline) throw Error('STOP runtime deadline');if(stats.requests>=i.maxRequests)throw Error('STOP request count');if((stats.requests+1)*i.estimatedUsdPerRequest>i.maxEstimatedUsd)throw Error('STOP internal estimated budget');}
-  async function fetchText(url,robot=false){
-   check();const delta=Date.now()-last;if(delta<i.minDelayMs)await wait(i.minDelayMs-delta);check();
-   stats.requests++;last=Date.now();let r;
-   try{r=await fetch(url,{redirect:'manual',headers:{'user-agent':UA,'accept':robot?'text/plain':'text/html'},signal:AbortSignal.timeout(12000)});}catch(e){throw Error(`STOP network failure: ${e.message}`);}
-   if([401,403,429].includes(r.status)){stats.blocked=true;throw Error(`STOP blocked HTTP ${r.status}`);}
-   if(r.status>=300 && r.status<400)throw Error(`STOP redirect HTTP ${r.status}`);
-   if(!r.ok)throw Error(`HTTP ${r.status}`);
-   if(!robot && !(r.headers.get('content-type')||'').includes('text/html'))throw Error('Unexpected response type');
-   if(Number(r.headers.get('content-length')||0)>2000000)throw Error('Oversized response');
-   const body=await r.text();if(body.length>2000000)throw Error('Oversized document');
-   if(!robot && /captcha|verify you are human|access denied|checking your browser/i.test(body.slice(0,2000))){stats.blocked=true;throw Error('STOP challenge detected');}return body;
-  }
-  async function allowed(url){const origin=new URL(url).origin;if(!robots.has(origin)){try{const body=await fetchText(`${origin}/robots.txt`,true);robots.set(origin,robotsParser(`${origin}/robots.txt`,body));}catch(e){log.warning(`Robots inaccessible, skipping ${origin}: ${e.message}`);robots.set(origin,null);}}
-   const parser=robots.get(origin);return !!parser && parser.isAllowed(url,UA)===true;
-  }
-  async function get(url){if(!await allowed(url)){log.warning('Robots disallowed/unverified, skipped '+url);return null;}return fetchText(url);}
-  try {
-   outer:for(const job of jobs){if(stats.records>=i.maxListings)break;let savedForJob=0;const pages=[job.url],donePages=new Set();
-    while(pages.length&&donePages.size<i.maxCategoryPagesPerJob&&savedForJob<i.maxListingsPerJob&&stats.records<i.maxListings){
-     const page=pages.shift();if(donePages.has(page))continue;donePages.add(page);
-     const html=await get(page);if(!html)break;stats.categoryPages++;
-     const {profiles,pages:more}=listProfiles(html,page);
-     for(const p of more)if(!donePages.has(p)&&!pages.includes(p))pages.push(p);
-     for(const url of profiles){if(seenProfiles.has(url))continue;seenProfiles.add(url);
-      if(stats.records>=i.maxListings||savedForJob>=i.maxListingsPerJob)break;
-      const profileHtml=await get(url);if(!profileHtml)continue;stats.profilesVisited++;
-      const data=parseProfile(profileHtml,url);if(!data.company)continue;
-      const key=(data.website?new URL(data.website).hostname.replace(/^www\./,''):data.company.toLowerCase().replace(/[^a-z0-9]/g,''));
-      if(seenCompanies.has(key))continue;seenCompanies.add(key);
-      let emailSource=data.emails.length?url:'';
-      if(i.extractEmails && i.visitBusinessWebsites && data.website){
-       const businessUrl=safeUrl(data.website);if(businessUrl){try{const html=await get(businessUrl);if(html){const e=parsePublicWebsiteEmails(html);data.emails=[...new Set([...data.emails,...e])];if(e.length)emailSource += (emailSource?'; ':'')+businessUrl;}}catch(e){if(e.message.startsWith('STOP'))throw e;log.warning('External website skipped: '+e.message);}}
-      }
-      if(!i.extractEmails)data.emails=[];
-      await Actor.pushData({company:data.company,city:job.city,state:job.state,trade:job.trade,website:data.website,email:data.emails[0]||'',emails:data.emails,emailSource,profileUrl:url,directory:'Cylex USA'});
-      stats.records++;savedForJob++;
-     }
-    }
-    stats.jobsCompleted++;
-   }
-  }catch(e){stats.stopReason=e.message;log.warning(stats.stopReason);}
-  await Actor.setValue('SUMMARY',{mode:'LIVE',jobsRequested:jobs.length,stats,estimatedRequestCostUsd:Number((stats.requests*i.estimatedUsdPerRequest).toFixed(4)),warning:'Internal estimate ONLY: not an Apify billing ceiling. Apify compute and proxies may cost more.'});
-  log.info('Complete',stats);
+try {
+ const input={...defaultInput,...(await Actor.getInput()||{})};
+ const jobs=plan(input);
+ for(const k of ['maxListings','maxListingsPerJob','maxPagesPerJob','maxRequests','maxRuntimeSeconds','minDelayMs'])if(!Number.isInteger(input[k])||input[k]<=0)throw Error(`Invalid ${k}`);
+ if(input.maxRequests>2000||input.minDelayMs<1000||input.maxRuntimeSeconds>3600)throw Error('Safety bounds exceeded');
+ if(input.dryRun){await Actor.setValue('SUMMARY',{mode:'DRY_RUN',jobs,plannedJobs:jobs.length,notice:'No directory HTTP requests were sent. An Apify execution can still use compute credits.'});log.info(`Dry-run jobs: ${jobs.length}`);}
+ else{
+ const counters={requests:0,records:0,jobsCompleted:0,stopReason:''};const seen=new Set();let lastRequest=0;const end=Date.now()+input.maxRuntimeSeconds*1000;
+ async function get(url){
+ if(Date.now()>end||counters.requests>=input.maxRequests||((counters.requests+1)*input.estimatedUsdPerRequest)>input.maxEstimatedUsd)throw Error('STOP: runtime, request count or estimated cost limit');
+ const wait=Math.max(0,input.minDelayMs-(Date.now()-lastRequest));if(wait)await new Promise(r=>setTimeout(r,wait));
+ if(Date.now()>end)throw Error('STOP: runtime');counters.requests++;lastRequest=Date.now();
+ const response=await fetch(url,{redirect:'manual',headers:{'user-agent':'CylexDirectoryResearch/1.0','accept':'text/html,text/plain'},signal:AbortSignal.timeout(12000)});
+ if(response.status===403||response.status===429||response.status===401)throw Error(`STOP: blocked (${response.status})`);
+ if(response.status>=300&&response.status<400)throw Error('STOP: redirect (no bypass attempts)');
+ if(!response.ok)throw Error(`STOP: HTTP ${response.status}`);
+ if(Number(response.headers.get('content-length')||0)>1500000)throw Error('STOP: large response');
+ const body=await response.text();if(body.length>1500000)throw Error('STOP: large document');
+ if(/captcha|verify you are human|access denied|checking your browser/i.test(body.slice(0,1500)))throw Error('STOP: challenge detected');return body;
+ }
+ let robots=null;
+ async function permitted(url){if(!robots){const text=await get('https://www.cylex.us.com/robots.txt');robots=robotsParser('https://www.cylex.us.com/robots.txt',text);}return robots.isAllowed(url,'CylexDirectoryResearch/1.0')===true;}
+ try{
+ outer:for(const job of jobs){let perJob=0;
+ for(let p=1;p<=input.maxPagesPerJob;p++){
+ if(perJob>=input.maxListingsPerJob||counters.records>=input.maxListings)break;
+ const url=pageUrl(job.url,p);if(!await permitted(url))throw Error('STOP: robots policy disallows or cannot verify listing page');
+ const listing=await get(url);const profiles=profileUrls(listing,url);if(!profiles.length)break;
+ for(const profile of profiles){if(perJob>=input.maxListingsPerJob||counters.records>=input.maxListings)break;if(seen.has(profile))continue;seen.add(profile);
+ if(!await permitted(profile))continue;
+ const html=await get(profile),details=parseProfile(html,profile);if(!details.company)continue;
+ await Actor.pushData({company:details.company,website:details.website,email:input.extractEmails?(details.emails[0]||''):'',emails:input.extractEmails?details.emails:[],profileUrl:profile,city:job.city,state:job.state,trade:job.trade,source:'Cylex USA'});
+ counters.records++;perJob++;
+ }
+ }
+ counters.jobsCompleted++;if(counters.records>=input.maxListings)break outer;
+ }
+ }catch(e){counters.stopReason=String(e.message||e);log.warning(counters.stopReason);}
+ await Actor.setValue('SUMMARY',{mode:'LIVE',...counters,plannedJobs:jobs.length,estimatedRequestCostUsd:counters.requests*input.estimatedUsdPerRequest,disclaimer:'Request estimate only; actual Apify compute, proxy and other fees are separate.'});
  }
 }finally{await Actor.exit();}

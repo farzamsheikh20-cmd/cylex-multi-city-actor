@@ -1,36 +1,15 @@
-# Cylex Multi-City Contact Extractor
+# Cylex Directory Actor
 
-Neutral-name GitHub-ready Apify Actor. No paid runs were conducted while preparing the package.
+A GitHub-ready Apify Actor. **Dry run is on by default.** No paid run has been performed.
 
-## Features
+## Setup
+Create a repository, upload the **extracted contents**, including `.actor/`, then link the repo in Apify and build from `main`. Do not upload just the ZIP into the repo.
 
-- `locations`: any list of `{ "city": "Dallas", "state": "Texas" }` objects (up to 1000 per batch)
-- `trades`: category IDs (`electrical` is confirmed; others need URL validation)
-- Automatically produces city × trade combinations
-- Paginated Cylex categories (`?p=2`) and individual company pages
-- Public `mailto:` email extraction on profile pages
-- Optional external business homepage check, off by default
-- In-run duplicate avoidance by website domain or company name
-- `dryRun: true` means no directory requests; running on Apify still uses compute
-- Request, runtime, page, per-job and estimated-cost limits
-- Robots check; stops on 401, 403, 429, challenge pages and unknown redirects; no proxy circumvention
+## Input
+Locations use `City, ST` strings, for example `["Houston, TX","Dallas, TX"]`. Multiple trades are combined with every city. Supported trade slugs are in `src/core.js`. For nationwide coverage supply a vetted city list in manageable batches; no automatic nationwide enumeration is included. There is no external-company-site crawling, only publicly displayed Cylex profile contacts. Robots rules are checked and challenge pages are not bypassed.
 
-## Github upload
+## Safety
+The built-in `maxEstimatedUsd` is **NOT** a guaranteed Apify spending cap; set an Apify platform spending limit separately. A dry run still incurs possible compute cost in Apify. Any site blocking or robots rule uncertainty stops live extraction. Live selectors and permissions must still be checked using a small authorized pilot.
 
-Create a GitHub repository named `cylex-multi-city-actor`. Extract this ZIP and upload all extracted files (including `.actor/`), NOT the ZIP alone. The root must include `package.json`, `Dockerfile`, `.actor/` and `src/`. In Apify Console create Actor → Connect Git repository, authorize GitHub, choose repo/branch, then build. No paid scraping runs were launched here.
-
-## First steps
-
-1. Run `npm install` then `npm test` and `npm run check` on a computer with network access.
-2. Keep `dryRun: true` and inspect the planned jobs.
-3. Confirm site permissions for the targets and enable one city with `maxListings:5`, `maxRequests:12` and an Apify platform spending limit.
-4. Validate fields, then expand to 3–5 cities. Duplicates are removed only inside one run; merge exported batches using website/domain externally.
-5. For nationwide searches prepare a city/state list from a licensed city dataset and split into manageable regional batches. State by itself DOES NOT enumerate all cities.
-
-## Notes
-
-- The program currently constructs city/category URLs using the Cylex pattern; not every category or city URL is guaranteed to exist. The trade slugs other than electrical are candidates only.
-- Some company pages may not display website or public email; no values are fabricated.
-- Cylex live accessibility, current markup, and robots permissions could not be fully verified in the local environment. No live extraction success is claimed.
-- The internal USD estimate is a request counter × assumed price, **not** an actual Apify billing limit. Use Apify platform budgets separately.
-- Website terms and permissions must be checked before any live crawl.
+## Local verification
+Run `npm test` for dependency-free planner/parser tests. `node --check src/*.js` validates source syntax. `npm install` and an Apify cloud build still need to pass to confirm dependency resolution.
