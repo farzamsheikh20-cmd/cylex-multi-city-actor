@@ -1,9 +1,13 @@
-            "type": "string"
+        "properties": {
+          "city": {
+            "title": "City",
+            "type": "string",
+            "description": "US city, such as Houston."
           },
           "state": {
             "title": "State",
-            "description": "US state name or abbreviation.",
-            "type": "string"
+            "type": "string",
+            "description": "US state, such as Texas."
           }
         },
         "required": [
@@ -15,27 +19,29 @@
     "trades": {
       "title": "Trades",
       "type": "array",
-      "description": "Trade labels to scrape in each city.",
+      "description": "Trade names; electrical maps to the electrical contractor category.",
       "default": [
         "electrical"
       ],
       "editor": "json",
       "items": {
-        "type": "string"
+        "type": "string",
+        "title": "Trade",
+        "description": "Trade name, for example electrical."
       }
     },
     "maxListings": {
       "title": "Maximum total listings",
       "type": "integer",
-      "description": "Hard cap on output records.",
+      "description": "Maximum unique company records emitted in one run.",
       "default": 100,
       "minimum": 1,
       "maximum": 10000
     },
     "maxListingsPerJob": {
-      "title": "Maximum records per job",
+      "title": "Maximum listings per city and trade",
       "type": "integer",
-      "description": "Cap for each city and trade.",
+      "description": "Maximum records per combination.",
       "default": 50,
       "minimum": 1,
       "maximum": 10000
@@ -43,7 +49,7 @@
     "maxCategoryPagesPerJob": {
       "title": "Maximum category pages per job",
       "type": "integer",
-      "description": "Maximum category pages per combination.",
+      "description": "Maximum listing pages to explore per combination.",
       "default": 5,
       "minimum": 1,
       "maximum": 30
@@ -51,7 +57,7 @@
     "maxRequests": {
       "title": "Maximum HTTP requests",
       "type": "integer",
-      "description": "Limit website requests.",
+      "description": "Hard cap on total requests including robots.txt.",
       "default": 160,
       "minimum": 1,
       "maximum": 5000
@@ -59,43 +65,44 @@
     "minDelayMs": {
       "title": "Minimum delay milliseconds",
       "type": "integer",
-      "description": "Delay between HTTP requests.",
+      "description": "Delay between web requests.",
       "default": 2500,
       "minimum": 1000
     },
     "maxRuntimeSeconds": {
       "title": "Maximum runtime seconds",
       "type": "integer",
-      "description": "Actor runtime stopping threshold.",
+      "description": "Internal stopping time for scraper.",
       "default": 540,
       "minimum": 1,
       "maximum": 3600
     },
     "extractEmails": {
-      "title": "Extract public emails",
+      "title": "Extract publicly listed emails",
       "type": "boolean",
-      "description": "Extract publicly shown company emails.",
+      "description": "Read public emails shown on directory company profiles.",
       "default": true
     },
     "visitBusinessWebsites": {
-      "title": "Visit company websites",
+      "title": "Visit business websites",
       "type": "boolean",
-      "description": "Visit external business homepages.",
+      "description": "Disabled by default; may visit external domains subject to robots checks.",
       "default": false
     },
     "maxEstimatedUsd": {
-      "title": "Estimated cost ceiling USD",
+      "title": "Internal estimated cost ceiling USD",
       "type": "number",
-      "description": "Internal cost estimate; not platform limit.",
+      "description": "Approximate request budget; not a platform spending cap.",
       "default": 0.5,
-      "minimum": 0.01
+      "minimum": 1e-05
     },
     "estimatedUsdPerRequest": {
       "title": "Estimated cost per request USD",
       "type": "number",
-      "description": "Internal cost assumption.",
+      "description": "Assumed charge for internal budgeting calculation.",
       "default": 0.003,
       "minimum": 1e-05
     }
-  }
+  },
+  "required": []
 }
