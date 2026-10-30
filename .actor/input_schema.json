@@ -1,108 +1,17 @@
-        "properties": {
-          "city": {
-            "title": "City",
-            "type": "string",
-            "description": "US city, such as Houston."
-          },
-          "state": {
-            "title": "State",
-            "type": "string",
-            "description": "US state, such as Texas."
-          }
-        },
-        "required": [
-          "city",
-          "state"
-        ]
-      }
-    },
-    "trades": {
-      "title": "Trades",
-      "type": "array",
-      "description": "Trade names; electrical maps to the electrical contractor category.",
-      "default": [
-        "electrical"
-      ],
-      "editor": "json",
-      "items": {
-        "type": "string",
-        "title": "Trade",
-        "description": "Trade name, for example electrical."
-      }
-    },
-    "maxListings": {
-      "title": "Maximum total listings",
-      "type": "integer",
-      "description": "Maximum unique company records emitted in one run.",
-      "default": 100,
-      "minimum": 1,
-      "maximum": 10000
-    },
-    "maxListingsPerJob": {
-      "title": "Maximum listings per city and trade",
-      "type": "integer",
-      "description": "Maximum records per combination.",
-      "default": 50,
-      "minimum": 1,
-      "maximum": 10000
-    },
-    "maxCategoryPagesPerJob": {
-      "title": "Maximum category pages per job",
-      "type": "integer",
-      "description": "Maximum listing pages to explore per combination.",
-      "default": 5,
-      "minimum": 1,
-      "maximum": 30
-    },
-    "maxRequests": {
-      "title": "Maximum HTTP requests",
-      "type": "integer",
-      "description": "Hard cap on total requests including robots.txt.",
-      "default": 160,
-      "minimum": 1,
-      "maximum": 5000
-    },
-    "minDelayMs": {
-      "title": "Minimum delay milliseconds",
-      "type": "integer",
-      "description": "Delay between web requests.",
-      "default": 2500,
-      "minimum": 1000
-    },
-    "maxRuntimeSeconds": {
-      "title": "Maximum runtime seconds",
-      "type": "integer",
-      "description": "Internal stopping time for scraper.",
-      "default": 540,
-      "minimum": 1,
-      "maximum": 3600
-    },
-    "extractEmails": {
-      "title": "Extract publicly listed emails",
-      "type": "boolean",
-      "description": "Read public emails shown on directory company profiles.",
-      "default": true
-    },
-    "visitBusinessWebsites": {
-      "title": "Visit business websites",
-      "type": "boolean",
-      "description": "Disabled by default; may visit external domains subject to robots checks.",
-      "default": false
-    },
-    "maxEstimatedUsd": {
-      "title": "Internal estimated cost ceiling USD",
-      "type": "number",
-      "description": "Approximate request budget; not a platform spending cap.",
-      "default": 0.5,
-      "minimum": 1e-05
-    },
-    "estimatedUsdPerRequest": {
-      "title": "Estimated cost per request USD",
-      "type": "number",
-      "description": "Assumed charge for internal budgeting calculation.",
-      "default": 0.003,
-      "minimum": 1e-05
-    }
-  },
-  "required": []
+{
+ "title":"Cylex city and trade inputs","description":"Configure controlled city/trade research. Dry run is on by default.","type":"object","schemaVersion":1,
+ "properties":{
+  "dryRun":{"title":"Dry run","description":"Plan jobs without contacting directory sites.","type":"boolean","default":true},
+  "locations":{"title":"Cities and states","description":"One city per line: City, ST (e.g. Houston, TX). For statewide work, provide many city lines.","type":"array","editor":"stringList","default":["Houston, TX","Dallas, TX","Austin, TX"],"items":{"type":"string"}},
+  "trades":{"title":"Contractor trades","description":"Trade names to combine with each city. Supported: electrical, plumbing, hvac, roofing, drywall, concrete, general contractor.","type":"array","editor":"stringList","default":["electrical"],"items":{"type":"string"}},
+  "maxListings":{"title":"Total maximum listings","description":"Maximum output companies in a run.","type":"integer","default":100,"minimum":1,"maximum":10000},
+  "maxListingsPerJob":{"title":"Maximum listings per city and trade","description":"Output limit for each city and trade combination.","type":"integer","default":25,"minimum":1,"maximum":1000},
+  "maxPagesPerJob":{"title":"Maximum category pages per job","description":"Directory category page limit per city and trade combination.","type":"integer","default":3,"minimum":1,"maximum":20},
+  "maxRequests":{"title":"Maximum HTTP requests","description":"Hard count cap, including robots.txt fetches.","type":"integer","default":30,"minimum":1,"maximum":2000},
+  "maxRuntimeSeconds":{"title":"Maximum runtime seconds","description":"Internal elapsed-time stop limit.","type":"integer","default":180,"minimum":30,"maximum":3600},
+  "minDelayMs":{"title":"Minimum delay between requests","description":"Delay in milliseconds between each request.","type":"integer","default":3000,"minimum":1000,"maximum":60000},
+  "extractEmails":{"title":"Extract directory emails","description":"Read publicly displayed mailto contact addresses on Cylex profile pages.","type":"boolean","default":true},
+  "maxEstimatedUsd":{"title":"Estimated request budget USD","description":"Approximate internal cost stop, not an Apify billing limit.","type":"number","default":0.25,"minimum":0.01,"maximum":100},
+  "estimatedUsdPerRequest":{"title":"Assumed USD per request","description":"Cost assumption only. Actual compute and proxies are separate.","type":"number","default":0.005,"minimum":0.0001,"maximum":10}
+ }
 }
