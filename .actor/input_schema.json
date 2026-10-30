@@ -1,1 +1,101 @@
-{"title":"Cylex Multi-City Extractor Input","type":"object","schemaVersion":1,"properties":{"dryRun":{"title":"Dry run (no website requests)","type":"boolean","default":true},"locations":{"title":"City and state combinations","type":"array","editor":"json","description":"List of {city,state} objects; states should be full names or 2-letter abbreviations. City locations are used to build category URLs.","default":[{"city":"Houston","state":"Texas"},{"city":"Dallas","state":"Texas"},{"city":"Austin","state":"Texas"}],"items":{"type":"object","properties":{"city":{"type":"string"},"state":{"type":"string"}},"required":["city","state"]}},"trades":{"title":"Trades (category identifiers)","type":"array","editor":"json","default":["electrical"],"items":{"type":"string"}},"maxListings":{"title":"Maximum total records","type":"integer","default":100,"minimum":1,"maximum":10000},"maxListingsPerJob":{"title":"Maximum records per city/trade","type":"integer","default":50,"minimum":1,"maximum":10000},"maxCategoryPagesPerJob":{"title":"Maximum category pages per city/trade","type":"integer","default":5,"minimum":1,"maximum":30},"maxRequests":{"title":"Hard HTTP request limit","type":"integer","default":160,"minimum":1,"maximum":5000},"minDelayMs":{"title":"Minimum request delay (ms)","type":"integer","default":2500,"minimum":1000},"maxRuntimeSeconds":{"title":"Runtime limit (seconds)","type":"integer","default":540,"minimum":1,"maximum":3600},"extractEmails":{"title":"Extract visible mailto emails from Cylex","type":"boolean","default":true},"visitBusinessWebsites":{"title":"Visit external company website homepages (off by default)","type":"boolean","default":false},"maxEstimatedUsd":{"title":"Internal estimated cost stop (USD; not Apify billing cap)","type":"number","default":0.5,"minimum":0.01},"estimatedUsdPerRequest":{"title":"Request-cost assumption (USD; user supplied)","type":"number","default":0.003,"minimum":0.00001}}}
+        "properties": {
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "city",
+          "state"
+        ]
+      }
+    },
+    "trades": {
+      "title": "Trades (category identifiers)",
+      "type": "array",
+      "editor": "json",
+      "default": [
+        "electrical"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "description": "Configure trades (category identifiers) for the Cylex multi-city run."
+    },
+    "maxListings": {
+      "title": "Maximum total records",
+      "type": "integer",
+      "default": 100,
+      "minimum": 1,
+      "maximum": 10000,
+      "description": "Configure maximum total records for the Cylex multi-city run."
+    },
+    "maxListingsPerJob": {
+      "title": "Maximum records per city/trade",
+      "type": "integer",
+      "default": 50,
+      "minimum": 1,
+      "maximum": 10000,
+      "description": "Configure maximum records per city/trade for the Cylex multi-city run."
+    },
+    "maxCategoryPagesPerJob": {
+      "title": "Maximum category pages per city/trade",
+      "type": "integer",
+      "default": 5,
+      "minimum": 1,
+      "maximum": 30,
+      "description": "Configure maximum category pages per city/trade for the Cylex multi-city run."
+    },
+    "maxRequests": {
+      "title": "Hard HTTP request limit",
+      "type": "integer",
+      "default": 160,
+      "minimum": 1,
+      "maximum": 5000,
+      "description": "Configure hard http request limit for the Cylex multi-city run."
+    },
+    "minDelayMs": {
+      "title": "Minimum request delay (ms)",
+      "type": "integer",
+      "default": 2500,
+      "minimum": 1000,
+      "description": "Configure minimum request delay (ms) for the Cylex multi-city run."
+    },
+    "maxRuntimeSeconds": {
+      "title": "Runtime limit (seconds)",
+      "type": "integer",
+      "default": 540,
+      "minimum": 1,
+      "maximum": 3600,
+      "description": "Configure runtime limit (seconds) for the Cylex multi-city run."
+    },
+    "extractEmails": {
+      "title": "Extract visible mailto emails from Cylex",
+      "type": "boolean",
+      "default": true,
+      "description": "Configure extract visible mailto emails from cylex for the Cylex multi-city run."
+    },
+    "visitBusinessWebsites": {
+      "title": "Visit external company website homepages (off by default)",
+      "type": "boolean",
+      "default": false,
+      "description": "Configure visit external company website homepages (off by default) for the Cylex multi-city run."
+    },
+    "maxEstimatedUsd": {
+      "title": "Internal estimated cost stop (USD; not Apify billing cap)",
+      "type": "number",
+      "default": 0.5,
+      "minimum": 0.01,
+      "description": "Configure internal estimated cost stop (usd; not apify billing cap) for the Cylex multi-city run."
+    },
+    "estimatedUsdPerRequest": {
+      "title": "Request-cost assumption (USD; user supplied)",
+      "type": "number",
+      "default": 0.003,
+      "minimum": 1e-05,
+      "description": "Configure request-cost assumption (usd; user supplied) for the Cylex multi-city run."
+    }
+  }
+}
