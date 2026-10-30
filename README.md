@@ -13,3 +13,8 @@ The built-in `maxEstimatedUsd` is **NOT** a guaranteed Apify spending cap; set a
 
 ## Local verification
 Run `npm test` for dependency-free planner/parser tests. `node --check src/*.js` validates source syntax. `npm install` and an Apify cloud build still need to pass to confirm dependency resolution.
+
+## Proxy mode
+`proxyMode: "DATACENTER"` enables Apify datacenter proxies via `Actor.createProxyConfiguration()`. Every request, including `robots.txt`, passes through a proxy using `undici.ProxyAgent`. `proxyMode: "OFF"` makes direct requests. Residential proxies are not configured. No retries after HTTP 403/429, and robots.txt denial stops access. Proxy credentials are never logged. Proxies are not a guarantee of access; follow target website policies.
+
+Before any live test, use Apify platform spending limits. `maxEstimatedUsd` is an internal assumption only, not an Apify billing cap.

@@ -1,26 +1,34 @@
 import {Actor,log} from 'apify';
 import robotsParser from 'robots-parser';
+import {ProxyAgent} from 'undici';
 import {plan,pageUrl,profileUrls,parseProfile} from './core.js';
-const defaultInput={dryRun:true,locations:['Houston, TX','Dallas, TX','Austin, TX'],trades:['electrical'],maxListings:100,maxListingsPerJob:25,maxPagesPerJob:3,maxRequests:30,maxRuntimeSeconds:180,minDelayMs:3000,extractEmails:true,maxEstimatedUsd:0.25,estimatedUsdPerRequest:0.005};
+const defaultInput={dryRun:true,locations:['Houston, TX','Dallas, TX','Austin, TX'],trades:['electrical'],maxListings:100,maxListingsPerJob:25,maxPagesPerJob:3,maxRequests:30,maxRuntimeSeconds:180,minDelayMs:3000,extractEmails:true,maxEstimatedUsd:0.25,estimatedUsdPerRequest:0.005,proxyMode:'DATACENTER'};
 await Actor.init();
 try {
  const input={...defaultInput,...(await Actor.getInput()||{})};
  const jobs=plan(input);
+ if(!['DATACENTER','OFF'].includes(input.proxyMode))throw Error('Invalid proxyMode');
  for(const k of ['maxListings','maxListingsPerJob','maxPagesPerJob','maxRequests','maxRuntimeSeconds','minDelayMs'])if(!Number.isInteger(input[k])||input[k]<=0)throw Error(`Invalid ${k}`);
  if(input.maxRequests>2000||input.minDelayMs<1000||input.maxRuntimeSeconds>3600)throw Error('Safety bounds exceeded');
  if(input.dryRun){await Actor.setValue('SUMMARY',{mode:'DRY_RUN',jobs,plannedJobs:jobs.length,notice:'No directory HTTP requests were sent. An Apify execution can still use compute credits.'});log.info(`Dry-run jobs: ${jobs.length}`);}
  else{
- const counters={requests:0,records:0,jobsCompleted:0,stopReason:''};const seen=new Set();let lastRequest=0;const end=Date.now()+input.maxRuntimeSeconds*1000;
+ const counters={requests:0,records:0,jobsCompleted:0,stopReason:'',proxyMode:input.proxyMode};
+ const proxyConfig=input.proxyMode==='DATACENTER'?await Actor.createProxyConfiguration():null;
+ if(input.proxyMode==='DATACENTER'&&!proxyConfig)throw Error('Apify datacenter proxy configuration is unavailable. Stopping.');
+ let activeProxyAgent=null;const seen=new Set();let lastRequest=0;const end=Date.now()+input.maxRuntimeSeconds*1000;
  async function get(url){
  if(Date.now()>end||counters.requests>=input.maxRequests||((counters.requests+1)*input.estimatedUsdPerRequest)>input.maxEstimatedUsd)throw Error('STOP: runtime, request count or estimated cost limit');
  const wait=Math.max(0,input.minDelayMs-(Date.now()-lastRequest));if(wait)await new Promise(r=>setTimeout(r,wait));
  if(Date.now()>end)throw Error('STOP: runtime');counters.requests++;lastRequest=Date.now();
- const response=await fetch(url,{redirect:'manual',headers:{'user-agent':'CylexDirectoryResearch/1.0','accept':'text/html,text/plain'},signal:AbortSignal.timeout(12000)});
- if(response.status===403||response.status===429||response.status===401)throw Error(`STOP: blocked (${response.status})`);
+ let dispatcher;
+ if(proxyConfig){const proxyUrl=await proxyConfig.newUrl();if(!proxyUrl)throw Error('STOP: no Apify proxy URL available');activeProxyAgent=new ProxyAgent(proxyUrl);dispatcher=activeProxyAgent;}
+ let response;
+ response=await fetch(url,{redirect:'manual',headers:{'user-agent':'CylexDirectoryResearch/1.0','accept':'text/html,text/plain'},signal:AbortSignal.timeout(12000),...(dispatcher?{dispatcher}:{})});
+ if(response.status===403||response.status===429||response.status===401)throw Error(`STOP: blocked (${response.status}) at ${new URL(url).pathname}; proxyMode=${input.proxyMode}`);
  if(response.status>=300&&response.status<400)throw Error('STOP: redirect (no bypass attempts)');
  if(!response.ok)throw Error(`STOP: HTTP ${response.status}`);
  if(Number(response.headers.get('content-length')||0)>1500000)throw Error('STOP: large response');
- const body=await response.text();if(body.length>1500000)throw Error('STOP: large document');
+ const body=await response.text();if(activeProxyAgent){await activeProxyAgent.close();activeProxyAgent=null;}if(body.length>1500000)throw Error('STOP: large document');
  if(/captcha|verify you are human|access denied|checking your browser/i.test(body.slice(0,1500)))throw Error('STOP: challenge detected');return body;
  }
  let robots=null;

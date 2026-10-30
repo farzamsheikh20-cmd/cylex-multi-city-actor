@@ -1,1 +1,19 @@
-{"dryRun":true,"locations":["Houston, TX","Dallas, TX","Austin, TX"],"trades":["electrical"],"maxListings":100,"maxRequests":30,"maxEstimatedUsd":0.25}
+{
+  "dryRun": true,
+  "proxyMode": "DATACENTER",
+  "locations": [
+    "Houston, TX"
+  ],
+  "trades": [
+    "electrical"
+  ],
+  "maxListings": 5,
+  "maxListingsPerJob": 5,
+  "maxPagesPerJob": 1,
+  "maxRequests": 8,
+  "maxRuntimeSeconds": 120,
+  "minDelayMs": 3000,
+  "extractEmails": true,
+  "maxEstimatedUsd": 0.04,
+  "estimatedUsdPerRequest": 0.005
+}
