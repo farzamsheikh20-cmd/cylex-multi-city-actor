@@ -1,3 +1,31 @@
+{
+  "title": "Cylex Multi-City Actor Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "dryRun": {
+      "title": "Dry run",
+      "type": "boolean",
+      "description": "Preview planned jobs without making scraping requests.",
+      "default": true
+    },
+    "locations": {
+      "title": "Cities and states",
+      "type": "array",
+      "description": "Cities and states for all combinations with trades.",
+      "default": [
+        {
+          "city": "Houston",
+          "state": "Texas"
+        },
+        {
+          "city": "Dallas",
+          "state": "Texas"
+        }
+      ],
+      "editor": "json",
+      "items": {
+        "type": "object",
         "properties": {
           "city": {
             "type": "string"
@@ -13,89 +41,88 @@
       }
     },
     "trades": {
-      "title": "Trades (category identifiers)",
+      "title": "Trades",
       "type": "array",
-      "editor": "json",
+      "description": "Trade labels to scrape in each selected city.",
       "default": [
         "electrical"
       ],
+      "editor": "json",
       "items": {
         "type": "string"
-      },
-      "description": "Configure trades (category identifiers) for the Cylex multi-city run."
+      }
     },
     "maxListings": {
-      "title": "Maximum total records",
+      "title": "Maximum total listings",
       "type": "integer",
+      "description": "Hard cap on output records.",
       "default": 100,
       "minimum": 1,
-      "maximum": 10000,
-      "description": "Configure maximum total records for the Cylex multi-city run."
+      "maximum": 10000
     },
     "maxListingsPerJob": {
-      "title": "Maximum records per city/trade",
+      "title": "Max records per city and trade",
       "type": "integer",
+      "description": "Maximum records for each city and trade combination.",
       "default": 50,
       "minimum": 1,
-      "maximum": 10000,
-      "description": "Configure maximum records per city/trade for the Cylex multi-city run."
+      "maximum": 10000
     },
     "maxCategoryPagesPerJob": {
-      "title": "Maximum category pages per city/trade",
+      "title": "Max category pages per job",
       "type": "integer",
+      "description": "Maximum directory pages per city and trade.",
       "default": 5,
       "minimum": 1,
-      "maximum": 30,
-      "description": "Configure maximum category pages per city/trade for the Cylex multi-city run."
+      "maximum": 30
     },
     "maxRequests": {
-      "title": "Hard HTTP request limit",
+      "title": "Maximum HTTP requests",
       "type": "integer",
+      "description": "Limit all HTTP requests for this Actor run.",
       "default": 160,
       "minimum": 1,
-      "maximum": 5000,
-      "description": "Configure hard http request limit for the Cylex multi-city run."
+      "maximum": 5000
     },
     "minDelayMs": {
-      "title": "Minimum request delay (ms)",
+      "title": "Minimum delay milliseconds",
       "type": "integer",
+      "description": "Delay between HTTP requests.",
       "default": 2500,
-      "minimum": 1000,
-      "description": "Configure minimum request delay (ms) for the Cylex multi-city run."
+      "minimum": 1000
     },
     "maxRuntimeSeconds": {
-      "title": "Runtime limit (seconds)",
+      "title": "Maximum runtime seconds",
       "type": "integer",
+      "description": "Internal Actor runtime stopping threshold.",
       "default": 540,
       "minimum": 1,
-      "maximum": 3600,
-      "description": "Configure runtime limit (seconds) for the Cylex multi-city run."
+      "maximum": 3600
     },
     "extractEmails": {
-      "title": "Extract visible mailto emails from Cylex",
+      "title": "Extract public emails",
       "type": "boolean",
-      "default": true,
-      "description": "Configure extract visible mailto emails from cylex for the Cylex multi-city run."
+      "description": "Extract publicly shown business email addresses.",
+      "default": true
     },
     "visitBusinessWebsites": {
-      "title": "Visit external company website homepages (off by default)",
+      "title": "Visit company websites",
       "type": "boolean",
-      "default": false,
-      "description": "Configure visit external company website homepages (off by default) for the Cylex multi-city run."
+      "description": "Whether to visit external business homepages.",
+      "default": false
     },
     "maxEstimatedUsd": {
-      "title": "Internal estimated cost stop (USD; not Apify billing cap)",
+      "title": "Estimated cost ceiling USD",
       "type": "number",
+      "description": "Internal cost estimate only; not an Apify platform spending limit.",
       "default": 0.5,
-      "minimum": 0.01,
-      "description": "Configure internal estimated cost stop (usd; not apify billing cap) for the Cylex multi-city run."
+      "minimum": 0.01
     },
     "estimatedUsdPerRequest": {
-      "title": "Request-cost assumption (USD; user supplied)",
+      "title": "Estimated cost per request USD",
       "type": "number",
+      "description": "Assumption used by the internal estimated cost calculation.",
       "default": 0.003,
-      "minimum": 1e-05,
-      "description": "Configure request-cost assumption (usd; user supplied) for the Cylex multi-city run."
+      "minimum": 1e-05
     }
   }
-}
