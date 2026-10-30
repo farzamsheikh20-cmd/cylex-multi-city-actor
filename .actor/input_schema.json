@@ -1,36 +1,8 @@
-{
-  "title": "Cylex Multi-City Actor Input",
-  "type": "object",
-  "schemaVersion": 1,
-  "properties": {
-    "dryRun": {
-      "title": "Dry run",
-      "type": "boolean",
-      "description": "Preview planned jobs without making scraping requests.",
-      "default": true
-    },
-    "locations": {
-      "title": "Cities and states",
-      "type": "array",
-      "description": "Cities and states for all combinations with trades.",
-      "default": [
-        {
-          "city": "Houston",
-          "state": "Texas"
-        },
-        {
-          "city": "Dallas",
-          "state": "Texas"
-        }
-      ],
-      "editor": "json",
-      "items": {
-        "type": "object",
-        "properties": {
-          "city": {
             "type": "string"
           },
           "state": {
+            "title": "State",
+            "description": "US state name or abbreviation.",
             "type": "string"
           }
         },
@@ -43,7 +15,7 @@
     "trades": {
       "title": "Trades",
       "type": "array",
-      "description": "Trade labels to scrape in each selected city.",
+      "description": "Trade labels to scrape in each city.",
       "default": [
         "electrical"
       ],
@@ -61,17 +33,17 @@
       "maximum": 10000
     },
     "maxListingsPerJob": {
-      "title": "Max records per city and trade",
+      "title": "Maximum records per job",
       "type": "integer",
-      "description": "Maximum records for each city and trade combination.",
+      "description": "Cap for each city and trade.",
       "default": 50,
       "minimum": 1,
       "maximum": 10000
     },
     "maxCategoryPagesPerJob": {
-      "title": "Max category pages per job",
+      "title": "Maximum category pages per job",
       "type": "integer",
-      "description": "Maximum directory pages per city and trade.",
+      "description": "Maximum category pages per combination.",
       "default": 5,
       "minimum": 1,
       "maximum": 30
@@ -79,7 +51,7 @@
     "maxRequests": {
       "title": "Maximum HTTP requests",
       "type": "integer",
-      "description": "Limit all HTTP requests for this Actor run.",
+      "description": "Limit website requests.",
       "default": 160,
       "minimum": 1,
       "maximum": 5000
@@ -94,7 +66,7 @@
     "maxRuntimeSeconds": {
       "title": "Maximum runtime seconds",
       "type": "integer",
-      "description": "Internal Actor runtime stopping threshold.",
+      "description": "Actor runtime stopping threshold.",
       "default": 540,
       "minimum": 1,
       "maximum": 3600
@@ -102,26 +74,26 @@
     "extractEmails": {
       "title": "Extract public emails",
       "type": "boolean",
-      "description": "Extract publicly shown business email addresses.",
+      "description": "Extract publicly shown company emails.",
       "default": true
     },
     "visitBusinessWebsites": {
       "title": "Visit company websites",
       "type": "boolean",
-      "description": "Whether to visit external business homepages.",
+      "description": "Visit external business homepages.",
       "default": false
     },
     "maxEstimatedUsd": {
       "title": "Estimated cost ceiling USD",
       "type": "number",
-      "description": "Internal cost estimate only; not an Apify platform spending limit.",
+      "description": "Internal cost estimate; not platform limit.",
       "default": 0.5,
       "minimum": 0.01
     },
     "estimatedUsdPerRequest": {
       "title": "Estimated cost per request USD",
       "type": "number",
-      "description": "Assumption used by the internal estimated cost calculation.",
+      "description": "Internal cost assumption.",
       "default": 0.003,
       "minimum": 1e-05
     }
