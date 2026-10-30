@@ -1,1 +1,1 @@
-
+{"actorSpecification":1,"name":"cylex-multi-city-actor","title":"Cylex Multi-City Contact Extractor","description":"Configurable city/state/trade combinations with cautious request budgets and public contact extraction.","version":"1.0","dockerfile":"../Dockerfile","input":"./input_schema.json"}
