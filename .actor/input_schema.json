@@ -1,18 +1,21 @@
-
-"proxyMode": {
-  "title": "Apify proxy mode",
-  "description": "Select the Apify proxy type for permitted requests.",
-  "type": "string",
-  "editor": "select",
-  "enum": [
-    "DATACENTER",
-    "RESIDENTIAL",
-    "OFF"
-  ],
-  "enumTitles": [
-    "Datacenter",
-    "Residential",
-    "Off"
-  ],
-  "default": "RESIDENTIAL"
+{
+  "title": "Cylex city and trade inputs",
+  "description": "Configure controlled city/trade research. Dry run is on by default.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "dryRun": {"title": "Dry run", "type": "boolean", "default": true},
+    "locations": {"title": "Cities and states", "type": "array", "editor": "stringList", "default": ["Houston, TX", "Dallas, TX", "Austin, TX"], "items": {"type": "string"}},
+    "trades": {"title": "Contractor trades", "type": "array", "editor": "stringList", "default": ["electrical"], "items": {"type": "string"}},
+    "maxListings": {"title": "Total maximum listings", "type": "integer", "default": 100, "minimum": 1, "maximum": 10000},
+    "maxListingsPerJob": {"title": "Maximum listings per city and trade", "type": "integer", "default": 25, "minimum": 1, "maximum": 1000},
+    "maxPagesPerJob": {"title": "Maximum category pages per job", "type": "integer", "default": 3, "minimum": 1, "maximum": 20},
+    "maxRequests": {"title": "Maximum HTTP requests", "type": "integer", "default": 30, "minimum": 1, "maximum": 2000},
+    "maxRuntimeSeconds": {"title": "Maximum runtime seconds", "type": "integer", "default": 180, "minimum": 30, "maximum": 3600},
+    "minDelayMs": {"title": "Minimum delay between requests", "type": "integer", "default": 3000, "minimum": 1000, "maximum": 60000},
+    "extractEmails": {"title": "Extract directory emails", "type": "boolean", "default": true},
+    "maxEstimatedUsd": {"title": "Estimated request budget USD", "type": "number", "default": 0.25, "minimum": 0.01, "maximum": 100},
+    "estimatedUsdPerRequest": {"title": "Assumed USD per request", "type": "number", "default": 0.005, "minimum": 0.0001, "maximum": 10},
+    "proxyMode": {"title": "Apify proxy mode", "description": "Datacenter or direct requests for permitted access.", "type": "string", "editor": "select", "enum": ["DATACENTER", "OFF"], "enumTitles": ["Datacenter", "Off"], "default": "DATACENTER"}
+  }
 }
