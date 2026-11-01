@@ -1,1 +1,9 @@
-{"actorSpecification":1,"name":"cylex-directory-actor","title":"Cylex Directory Actor","description":"Cautious multi-city trade directory research with public company links and emails.","version":"1.0","input":"./input_schema.json","dockerfile":"../Dockerfile"}
+{
+  "actorSpecification": 1,
+  "name": "cylex-directory-actor",
+  "title": "Cylex Directory Actor",
+  "description": "Controlled directory research and public business contact extraction.",
+  "version": "1.0",
+  "input": "./input_schema.json",
+  "dockerfile": "../Dockerfile"
+}

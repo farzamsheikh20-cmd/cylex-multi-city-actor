@@ -1,21 +1,127 @@
 {
   "title": "Cylex city and trade inputs",
-  "description": "Configure controlled city/trade research. Dry run is on by default.",
+  "description": "Use only where directory access is permitted. Dry run defaults to true.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
-    "dryRun": {"title": "Dry run", "type": "boolean", "default": true},
-    "locations": {"title": "Cities and states", "type": "array", "editor": "stringList", "default": ["Houston, TX", "Dallas, TX", "Austin, TX"], "items": {"type": "string"}},
-    "trades": {"title": "Contractor trades", "type": "array", "editor": "stringList", "default": ["electrical"], "items": {"type": "string"}},
-    "maxListings": {"title": "Total maximum listings", "type": "integer", "default": 100, "minimum": 1, "maximum": 10000},
-    "maxListingsPerJob": {"title": "Maximum listings per city and trade", "type": "integer", "default": 25, "minimum": 1, "maximum": 1000},
-    "maxPagesPerJob": {"title": "Maximum category pages per job", "type": "integer", "default": 3, "minimum": 1, "maximum": 20},
-    "maxRequests": {"title": "Maximum HTTP requests", "type": "integer", "default": 30, "minimum": 1, "maximum": 2000},
-    "maxRuntimeSeconds": {"title": "Maximum runtime seconds", "type": "integer", "default": 180, "minimum": 30, "maximum": 3600},
-    "minDelayMs": {"title": "Minimum delay between requests", "type": "integer", "default": 3000, "minimum": 1000, "maximum": 60000},
-    "extractEmails": {"title": "Extract directory emails", "type": "boolean", "default": true},
-    "maxEstimatedUsd": {"title": "Estimated request budget USD", "type": "number", "default": 0.25, "minimum": 0.01, "maximum": 100},
-    "estimatedUsdPerRequest": {"title": "Assumed USD per request", "type": "number", "default": 0.005, "minimum": 0.0001, "maximum": 10},
-    "proxyMode": {"title": "Apify proxy mode", "description": "Datacenter or direct requests for permitted access.", "type": "string", "editor": "select", "enum": ["DATACENTER", "OFF"], "enumTitles": ["Datacenter", "Off"], "default": "DATACENTER"}
+    "dryRun": {
+      "title": "Dry run",
+      "description": "Plan jobs without sending HTTP requests.",
+      "type": "boolean",
+      "default": true
+    },
+    "locations": {
+      "title": "Cities and states",
+      "description": "City, ST; one location per entry.",
+      "type": "array",
+      "default": [
+        "Houston, TX",
+        "Dallas, TX",
+        "Austin, TX"
+      ],
+      "editor": "stringList",
+      "items": {
+        "type": "string"
+      }
+    },
+    "trades": {
+      "title": "Contractor trades",
+      "description": "Supported: electrical, plumbing, hvac, roofing, drywall, concrete, general contractor.",
+      "type": "array",
+      "default": [
+        "electrical"
+      ],
+      "editor": "stringList",
+      "items": {
+        "type": "string"
+      }
+    },
+    "maxListings": {
+      "title": "Maximum listings",
+      "description": "Total maximum companies to output.",
+      "type": "integer",
+      "default": 100,
+      "minimum": 1,
+      "maximum": 10000
+    },
+    "maxListingsPerJob": {
+      "title": "Listings per city/trade",
+      "description": "Maximum companies from each combination.",
+      "type": "integer",
+      "default": 25,
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "maxPagesPerJob": {
+      "title": "Pages per city/trade",
+      "description": "Maximum category pages in each job.",
+      "type": "integer",
+      "default": 3,
+      "minimum": 1,
+      "maximum": 20
+    },
+    "maxRequests": {
+      "title": "Maximum requests",
+      "description": "Hard request limit including robots.txt.",
+      "type": "integer",
+      "default": 30,
+      "minimum": 1,
+      "maximum": 2000
+    },
+    "maxRuntimeSeconds": {
+      "title": "Maximum runtime seconds",
+      "description": "Maximum actor processing time.",
+      "type": "integer",
+      "default": 180,
+      "minimum": 30,
+      "maximum": 3600
+    },
+    "minDelayMs": {
+      "title": "Minimum request delay",
+      "description": "Minimum delay between requests, in milliseconds.",
+      "type": "integer",
+      "default": 3000,
+      "minimum": 1000,
+      "maximum": 60000
+    },
+    "extractEmails": {
+      "title": "Extract visible emails",
+      "description": "Extract public mailto addresses from directory profiles.",
+      "type": "boolean",
+      "default": true
+    },
+    "maxEstimatedUsd": {
+      "title": "Estimated request budget USD",
+      "description": "Internal estimate, not a billing cap.",
+      "type": "number",
+      "default": 0.25,
+      "minimum": 0.01,
+      "maximum": 100
+    },
+    "estimatedUsdPerRequest": {
+      "title": "Assumed cost per request",
+      "description": "Cost estimate only; proxy and compute charges differ.",
+      "type": "number",
+      "default": 0.005,
+      "minimum": 0.0001,
+      "maximum": 10
+    },
+    "proxyMode": {
+      "title": "Apify proxy mode",
+      "description": "RESIDENTIAL selects Apify residential US proxies; blocked requests still stop.",
+      "type": "string",
+      "default": "RESIDENTIAL",
+      "editor": "select",
+      "enum": [
+        "RESIDENTIAL",
+        "DATACENTER",
+        "OFF"
+      ],
+      "enumTitles": [
+        "Residential US",
+        "Datacenter",
+        "Off"
+      ]
+    }
   }
 }
