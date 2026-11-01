@@ -1,6 +1,6 @@
 {
   "name": "cylex-directory-actor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,6 @@
   },
   "dependencies": {
     "apify": "^3.4.0",
-    "cheerio": "^1.0.0",
     "robots-parser": "^3.0.1",
     "undici": "^6.21.0"
   },
